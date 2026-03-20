@@ -1,0 +1,187 @@
+import React, { useState, useEffect } from 'react';
+import { Copy, Check, Wallet, QrCode, Star, Moon, Gift } from 'lucide-react';
+
+export default function App() {
+  const [copiedText, setCopiedText] = useState(null);
+  const [activeTab, setActiveTab] = useState('bkash');
+  const [showToast, setShowToast] = useState(false);
+
+  // Fallback copy function for iframe compatibility
+  const handleCopy = (text, type) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setCopiedText(type);
+      setShowToast(true);
+      setTimeout(() => {
+        setCopiedText(null);
+        setShowToast(false);
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+    document.body.removeChild(textArea);
+  };
+
+  // Payment methods data mimicking the exact app themes
+  const paymentMethods = {
+    bkash: {
+      id: 'bkash',
+      name: 'bKash',
+      type: 'Personal',
+      number: '01401523325',
+      color: 'bg-[#e2136e]', // Signature bKash Pink
+      lightColor: 'bg-pink-50',
+      textColor: 'text-[#e2136e]',
+      borderColor: 'border-[#e2136e]',
+      headerClass: 'bg-[#c10e5d]', // Darker pink for card header
+      pageClass: 'bg-[#e2136e]', // Full bKash pink background
+    },
+    bank: {
+      id: 'bank',
+      name: 'Bank Transfer',
+      type: 'BRAC Bank',
+      accountName: 'FARHAN SADIQUE',
+      number: '1062140070001',
+      color: 'bg-[#0067b1]', // Astha Blue
+      lightColor: 'bg-blue-50',
+      textColor: 'text-[#0067b1]',
+      borderColor: 'border-[#0067b1]',
+      headerClass: 'bg-[#00528e] border-b-[6px] border-[#e8a317]', // Dark blue with Astha yellow nav accent
+      pageClass: 'bg-[#0067b1]', // Full Astha blue background
+    }
+  };
+
+  const activeMethod = paymentMethods[activeTab];
+
+  return (
+    <div className={`min-h-screen ${activeMethod.pageClass} transition-colors duration-700 flex items-center justify-center p-4 font-sans relative overflow-hidden`}>
+      
+      {/* --- Dynamic Background Decorations --- */}
+      
+      {/* bKash Eid Theme Decorations */}
+      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${activeTab === 'bkash' ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="absolute top-12 right-[15%] text-white/30 animate-pulse">
+          <Star size={48} />
+        </div>
+        <div className="absolute top-32 left-[10%] text-white/40 animate-bounce" style={{ animationDuration: '4s' }}>
+          <Moon size={64} />
+        </div>
+        <div className="absolute bottom-24 right-[25%] text-white/20">
+          <Star size={32} />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/10 to-transparent"></div>
+      </div>
+
+      {/* BRAC Astha Geometric Theme Decorations */}
+      <div className={`absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-700 ${activeTab === 'bank' ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="absolute w-[800px] h-[800px] border-[40px] border-white/5 rounded-[80px] transform rotate-45 -translate-y-1/4 transition-transform duration-1000"></div>
+        <div className="absolute w-[400px] h-[400px] border-[20px] border-white/5 rounded-[40px] transform rotate-45 translate-x-1/3 translate-y-1/3 transition-transform duration-1000"></div>
+      </div>
+
+      {/* --- Main Card --- */}
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] ring-1 ring-white/20 overflow-hidden relative z-10 transition-all duration-300">
+        
+        {/* Header Section */}
+        <div className={`${activeMethod.headerClass} transition-colors duration-500 p-8 text-center relative`}>
+          <h1 className="text-2xl md:text-3xl font-black text-white flex items-center justify-center gap-3 tracking-tight drop-shadow-sm">
+            Drop your love (and cash) here. <Gift size={28} className="text-white/90" />
+          </h1>
+        </div>
+
+        {/* Content Section */}
+        <div className="p-6">
+          
+          {/* Payment Method Selector */}
+          <div className="flex gap-2 mb-6 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+            {Object.keys(paymentMethods).map((key) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-bold transition-all duration-300 ${
+                  activeTab === key 
+                    ? `bg-white ${paymentMethods[key].textColor} shadow-sm border border-gray-200 scale-[1.02]` 
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {paymentMethods[key].name}
+              </button>
+            ))}
+          </div>
+
+          {/* Active Payment Card */}
+          <div className={`rounded-2xl border-2 ${activeMethod.borderColor} p-6 transition-all duration-300 ${activeMethod.lightColor}`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full ${activeMethod.color} flex items-center justify-center text-white shadow-md`}>
+                  {activeTab === 'bank' ? <Wallet size={20} /> : <span className="font-bold text-lg">৳</span>}
+                </div>
+                <div>
+                  <h3 className={`font-bold ${activeMethod.textColor}`}>{activeMethod.name}</h3>
+                  <p className="text-xs text-gray-600 font-medium">{activeMethod.type}</p>
+                </div>
+              </div>
+              <QrCode className={`${activeMethod.textColor} opacity-50`} size={24} />
+            </div>
+
+            {/* Inner White Data Card */}
+            <div className="bg-white rounded-xl p-4 flex flex-col gap-3 border border-gray-200 shadow-sm mb-4 relative overflow-hidden">
+              
+              {/* Easter Egg: BRAC Astha "Active" Ribbon */}
+              {activeTab === 'bank' && (
+                <div className="absolute top-3 -right-8 bg-[#68b944] text-white text-[10px] font-bold py-1 w-28 text-center transform rotate-45 shadow-sm tracking-wide">
+                  Active
+                </div>
+              )}
+
+              {activeMethod.accountName && (
+                <div>
+                  <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wider font-bold">Account Name</p>
+                  <p className={`text-base font-bold ${activeTab === 'bank' ? 'text-[#0067b1]' : 'text-gray-800'}`}>
+                    {activeMethod.accountName}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wider font-bold">Account Number</p>
+                <p className="text-xl font-mono font-bold text-gray-700 tracking-tight">{activeMethod.number}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleCopy(activeMethod.number, activeMethod.id)}
+              className={`w-full py-3.5 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 transform active:scale-95 ${activeMethod.color} hover:opacity-90 shadow-lg`}
+            >
+              {copiedText === activeMethod.id ? (
+                <>
+                  <Check size={20} className="animate-in zoom-in" />
+                  Copied to Clipboard!
+                </>
+              ) : (
+                <>
+                  <Copy size={20} />
+                  Copy {activeMethod.name} Number
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="mt-6 text-center text-xs text-gray-400 font-medium">
+            Securely send via your preferred app.
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Toast Notification */}
+      <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 transition-all duration-300 z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
+        <div className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl font-medium text-sm flex items-center gap-2">
+          <Check size={16} className="text-green-400" /> Number copied!
+        </div>
+      </div>
+
+    </div>
+  );
+}
